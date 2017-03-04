@@ -1,5 +1,9 @@
 package tdd.vendingMachine;
 
-public class VendingMachine {
+import java.util.List;
+
+public interface VendingMachine {
+
+    List<Integer> listShelveNumbers();
 
 }
