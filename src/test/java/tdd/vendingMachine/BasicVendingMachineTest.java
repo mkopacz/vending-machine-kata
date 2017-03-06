@@ -1,14 +1,15 @@
 package tdd.vendingMachine;
 
+import org.assertj.core.data.MapEntry;
 import org.junit.Before;
 import org.junit.Test;
 import tdd.vendingMachine.display.Display;
+import tdd.vendingMachine.domain.Coin;
 import tdd.vendingMachine.domain.Product;
 import tdd.vendingMachine.domain.Shelve;
 import tdd.vendingMachine.exception.InvalidShelveException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
@@ -31,7 +32,7 @@ public class BasicVendingMachineTest {
 
     @Test
     public void shouldListShelveNumbers() {
-        VendingMachine vendingMachine = new BasicVendingMachine(shelves, display);
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, Collections.EMPTY_MAP, display);
 
         List<Integer> shelveNumbers = vendingMachine.listShelveNumbers();
 
@@ -40,7 +41,7 @@ public class BasicVendingMachineTest {
 
     @Test
     public void shouldDisplayProductPriceWhenSelectedShelve() throws InvalidShelveException {
-        VendingMachine vendingMachine = new BasicVendingMachine(shelves, display);
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, Collections.EMPTY_MAP, display);
 
         vendingMachine.selectShelve(2);
 
@@ -49,9 +50,27 @@ public class BasicVendingMachineTest {
 
     @Test(expected = InvalidShelveException.class)
     public void shouldThrowExceptionWhenSelectedInvalidShelve() throws InvalidShelveException {
-        VendingMachine vendingMachine = new BasicVendingMachine(shelves, display);
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, Collections.EMPTY_MAP, display);
 
         vendingMachine.selectShelve(0);
+    }
+
+    @Test
+    public void shouldStoreCoinInsideMachineWhenSelectedShelveAndInsertedCoin() throws InvalidShelveException {
+        Map<Coin, Integer> coins = new HashMap<>();
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, coins, display);
+
+        vendingMachine.selectShelve(1);
+        vendingMachine.insertCoin(Coin.ONE_DOLLAR);
+
+        assertThat(coins).containsExactly(MapEntry.entry(Coin.ONE_DOLLAR, 1));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionWhenInsertedCoinWithoutSelectingShelve() throws InvalidShelveException {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, Collections.EMPTY_MAP, display);
+
+        vendingMachine.insertCoin(Coin.TEN_CENTS);
     }
 
 }
