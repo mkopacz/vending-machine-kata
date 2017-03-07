@@ -93,4 +93,33 @@ public class BasicVendingMachineTest {
         verify(display).displayMessage("mineral water 104.70");
     }
 
+    @Test
+    public void shouldShowThatInsertedNotEnoughMoney() throws InvalidShelveException {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, new HashMap<>(), display);
+
+        vendingMachine.selectShelve(3);
+        vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+        vendingMachine.insertCoin(Coin.FIFTY_CENTS);
+
+        assertThat(vendingMachine.insertedEnoughMoney()).isFalse();
+    }
+
+    @Test
+    public void shouldShowThatInsertedEnoughMoney() throws InvalidShelveException {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, new HashMap<>(), display);
+
+        vendingMachine.selectShelve(1);
+        vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+        vendingMachine.insertCoin(Coin.FIFTY_CENTS);
+
+        assertThat(vendingMachine.insertedEnoughMoney()).isTrue();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionWhenCheckedInsertedMoneyWithoutSelectingShelve() throws InvalidShelveException {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, Collections.EMPTY_MAP, display);
+
+        vendingMachine.insertCoin(Coin.TEN_CENTS);
+    }
+
 }

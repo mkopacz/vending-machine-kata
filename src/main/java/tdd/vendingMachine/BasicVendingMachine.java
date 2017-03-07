@@ -67,6 +67,16 @@ public class BasicVendingMachine implements VendingMachine {
         displayInsertedCoinMessage();
     }
 
+    @Override
+    public boolean insertedEnoughMoney() {
+        if (!selectedShelve.isPresent()) {
+            throw new IllegalStateException("No shelve is selected!");
+        }
+
+        BigDecimal productPrice = selectedShelve.get().getProductPrice();
+        return insertedMoney.get().compareTo(productPrice) >= 0;
+    }
+
     private void displaySelectedShelveMessage() {
         String productName = selectedShelve.get().getProductName();
         String productPrice = selectedShelve.get().getProductPrice().toString();

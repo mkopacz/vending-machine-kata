@@ -13,4 +13,6 @@ public interface VendingMachine {
 
     void insertCoin(Coin coin);
 
+    boolean insertedEnoughMoney();
+
 }
