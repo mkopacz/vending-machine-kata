@@ -73,6 +73,15 @@ public class BasicVendingMachineTest {
         vendingMachine.insertCoin(Coin.TEN_CENTS);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionWhenSelectedShelveAfterInsertingCoins() throws InvalidShelveException {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, new HashMap<>(), display);
+
+        vendingMachine.selectShelve(1);
+        vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+        vendingMachine.selectShelve(2);
+    }
+
     @Test
     public void shouldDisplayAmountOfMoneyNeededToCoverProductPrice() throws InvalidShelveException {
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, new HashMap<>(), display);

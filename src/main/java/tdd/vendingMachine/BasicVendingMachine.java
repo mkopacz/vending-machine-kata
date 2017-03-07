@@ -35,11 +35,16 @@ public class BasicVendingMachine implements VendingMachine {
 
     @Override
     public void selectShelve(int shelveNumber) throws InvalidShelveException {
+        if (insertedMoney.isPresent()) {
+            throw new IllegalStateException("Already inserted coins!");
+        }
+
         selectedShelve = shelves.stream()
             .filter(shelve -> shelve.getNumber() == shelveNumber)
             .findFirst();
 
         if (selectedShelve.isPresent()) {
+            insertedMoney = Optional.of(BigDecimal.ZERO);
             displaySelectedShelveMessage();
         } else {
             throw new InvalidShelveException(shelveNumber);
@@ -55,8 +60,8 @@ public class BasicVendingMachine implements VendingMachine {
         coins.compute(coin, (k, v) -> v == null ? 1 : v + 1);
 
         BigDecimal coinValue = coin.getValue();
-        insertedMoney = Optional.of(
-            insertedMoney.orElse(BigDecimal.ZERO).add(coinValue)
+        insertedMoney = insertedMoney.map(
+            currentMoney -> currentMoney.add(coinValue)
         );
 
         displayInsertedCoinMessage();
