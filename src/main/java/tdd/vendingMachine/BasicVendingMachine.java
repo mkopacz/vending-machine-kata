@@ -5,6 +5,7 @@ import tdd.vendingMachine.domain.Coin;
 import tdd.vendingMachine.domain.Shelve;
 import tdd.vendingMachine.exception.InvalidShelveException;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +18,7 @@ public class BasicVendingMachine implements VendingMachine {
     private final Display display;
 
     private Optional<Shelve> selectedShelve = Optional.empty();
+    private Optional<BigDecimal> insertedMoney = Optional.empty();
 
     public BasicVendingMachine(List<Shelve> shelves, Map<Coin, Integer> coins, Display display) {
         this.shelves = shelves;
@@ -51,12 +53,26 @@ public class BasicVendingMachine implements VendingMachine {
         }
 
         coins.compute(coin, (k, v) -> v == null ? 1 : v + 1);
+
+        BigDecimal coinValue = coin.getValue();
+        insertedMoney = Optional.of(
+            insertedMoney.orElse(BigDecimal.ZERO).add(coinValue)
+        );
+
+        displayInsertedCoinMessage();
     }
 
     private void displaySelectedShelveMessage() {
         String productName = selectedShelve.get().getProductName();
         String productPrice = selectedShelve.get().getProductPrice().toString();
         display.displayMessage(productName + " " + productPrice);
+    }
+
+    private void displayInsertedCoinMessage() {
+        String productName = selectedShelve.get().getProductName();
+        BigDecimal productPrice = selectedShelve.get().getProductPrice();
+        BigDecimal moneyLeft = productPrice.subtract(insertedMoney.get());
+        display.displayMessage(productName + " " + moneyLeft);
     }
 
 }

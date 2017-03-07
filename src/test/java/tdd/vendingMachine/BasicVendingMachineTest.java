@@ -73,4 +73,15 @@ public class BasicVendingMachineTest {
         vendingMachine.insertCoin(Coin.TEN_CENTS);
     }
 
+    @Test
+    public void shouldDisplayAmountOfMoneyNeededToCoverProductPrice() throws InvalidShelveException {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, new HashMap<>(), display);
+
+        vendingMachine.selectShelve(3);
+        vendingMachine.insertCoin(Coin.FIVE_DOLLARS);
+        vendingMachine.insertCoin(Coin.TWENTY_CENTS);
+
+        verify(display).displayMessage("mineral water 104.70");
+    }
+
 }
