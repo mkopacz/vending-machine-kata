@@ -26,7 +26,6 @@ public class ConsoleDisplayTest {
         display.displayMessage(message);
 
         assertThat(consoleOutput.toString()).isEqualTo(message + "\n");
-
     }
 
 }

@@ -2,27 +2,27 @@ package tdd.vendingMachine;
 
 import tdd.vendingMachine.display.Display;
 import tdd.vendingMachine.domain.Coin;
+import tdd.vendingMachine.domain.CoinCassette;
 import tdd.vendingMachine.domain.Shelve;
 import tdd.vendingMachine.exception.InvalidShelveException;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BasicVendingMachine implements VendingMachine {
 
     private final List<Shelve> shelves;
-    private final Map<Coin, Integer> coins;
+    private final CoinCassette cassette;
     private final Display display;
 
     private Optional<Shelve> selectedShelve = Optional.empty();
     private Optional<BigDecimal> insertedMoney = Optional.empty();
 
-    public BasicVendingMachine(List<Shelve> shelves, Map<Coin, Integer> coins, Display display) {
+    public BasicVendingMachine(List<Shelve> shelves, CoinCassette cassette, Display display) {
         this.shelves = shelves;
-        this.coins = coins;
+        this.cassette = cassette;
         this.display = display;
     }
 
@@ -57,13 +57,8 @@ public class BasicVendingMachine implements VendingMachine {
             throw new IllegalStateException("No shelve is selected!");
         }
 
-        coins.compute(coin, (k, v) -> v == null ? 1 : v + 1);
-
-        BigDecimal coinValue = coin.getValue();
-        insertedMoney = insertedMoney.map(
-            currentMoney -> currentMoney.add(coinValue)
-        );
-
+        cassette.putCoin(coin);
+        addCoinToInsertedMoney(coin);
         displayInsertedCoinMessage();
     }
 
@@ -75,6 +70,13 @@ public class BasicVendingMachine implements VendingMachine {
 
         BigDecimal productPrice = selectedShelve.get().getProductPrice();
         return insertedMoney.get().compareTo(productPrice) >= 0;
+    }
+
+    private void addCoinToInsertedMoney(Coin coin) {
+        BigDecimal coinValue = coin.getValue();
+        insertedMoney = insertedMoney.map(
+            currentMoney -> currentMoney.add(coinValue)
+        );
     }
 
     private void displaySelectedShelveMessage() {
