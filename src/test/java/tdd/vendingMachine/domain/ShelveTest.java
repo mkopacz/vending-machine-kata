@@ -3,6 +3,8 @@ package tdd.vendingMachine.domain;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -31,6 +33,34 @@ public class ShelveTest {
         boolean isProductAvailable = shelve.isProductAvailable();
 
         assertThat(isProductAvailable).isFalse();
+    }
+
+    @Test
+    public void shouldReleaseProductWhenItIsAvailable() {
+        Shelve shelve = new Shelve(1, new Product("product", "1.99"), 1);
+
+        Optional<Product> product = shelve.releaseProduct();
+
+        assertThat(product).isPresent();
+    }
+
+    @Test
+    public void shouldNotReleaseProductWhenItIsNotAvailable() {
+        Shelve shelve = new Shelve(1, new Product("product", "1.99"), 0);
+
+        Optional<Product> product = shelve.releaseProduct();
+
+        assertThat(product).isEmpty();
+    }
+
+    @Test
+    public void shouldNotReleaseProductWhenItIsNotAvailableAnymore() {
+        Shelve shelve = new Shelve(1, new Product("product", "1.99"), 1);
+
+        shelve.releaseProduct();
+        Optional<Product> product = shelve.releaseProduct();
+
+        assertThat(product).isEmpty();
     }
 
 }

@@ -16,6 +16,11 @@ public class Product {
         this.price = new BigDecimal(price).setScale(PRICE_SCALE, PRICE_ROUNDING_MODE);
     }
 
+    public Product(Product productType) {
+        this.name = productType.name;
+        this.price = productType.price;
+    }
+
     public String getName() {
         return name;
     }
