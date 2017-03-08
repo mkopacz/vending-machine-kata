@@ -37,8 +37,8 @@ public class BasicVendingMachine implements VendingMachine {
 
     @Override
     public void selectShelve(int shelveNumber) throws InvalidShelveException, ProductNotAvailableException {
-        if (insertedMoney.isPresent()) {
-            throw new IllegalStateException("Already inserted coins!");
+        if (selectedShelve.isPresent() || insertedMoney.isPresent()) {
+            throw new IllegalStateException("Either selected shelve or inserted money has been already initialized!");
         }
 
         Optional<Shelve> foundShelve = shelves.stream()
@@ -52,25 +52,25 @@ public class BasicVendingMachine implements VendingMachine {
             throw new ProductNotAvailableException(productName);
         } else {
             initMachineState(foundShelve);
-            displaySelectedShelveMessage();
+            displaySelectedShelveMessage(foundShelve.get());
         }
     }
 
     @Override
     public void insertCoin(Coin coin) throws CoinNotAcceptableException {
-        if (!selectedShelve.isPresent()) {
-            throw new IllegalStateException("No shelve is selected!");
+        if (!selectedShelve.isPresent() || !insertedMoney.isPresent()) {
+            throw new IllegalStateException("Either selected shelve or inserted money hasn't been yet initialized!");
         }
 
         cassette.putCoin(coin);
         addCoinToInsertedMoney(coin);
-        displayInsertedCoinMessage();
+        displayInsertedCoinMessage(selectedShelve.get(), insertedMoney.get());
     }
 
     @Override
     public boolean insertedEnoughMoney() {
-        if (!selectedShelve.isPresent()) {
-            throw new IllegalStateException("No shelve is selected!");
+        if (!selectedShelve.isPresent() || !insertedMoney.isPresent()) {
+            throw new IllegalStateException("Either selected shelve or inserted money hasn't been yet initialized!");
         }
 
         BigDecimal productPrice = selectedShelve.get().getProductPrice();
@@ -79,8 +79,8 @@ public class BasicVendingMachine implements VendingMachine {
 
     @Override
     public List<Coin> cancel() {
-        if (!selectedShelve.isPresent()) {
-            throw new IllegalStateException("No shelve is selected!");
+        if (!selectedShelve.isPresent() || !insertedMoney.isPresent()) {
+            throw new IllegalStateException("Either selected shelve or inserted money hasn't been yet initialized!");
         }
 
         BigDecimal moneyToReturn = insertedMoney.get();
@@ -111,16 +111,16 @@ public class BasicVendingMachine implements VendingMachine {
         insertedMoney = Optional.empty();
     }
 
-    private void displaySelectedShelveMessage() {
-        String productName = selectedShelve.get().getProductName();
-        String productPrice = selectedShelve.get().getProductPrice().toString();
+    private void displaySelectedShelveMessage(Shelve selectedShelve) {
+        String productName = selectedShelve.getProductName();
+        String productPrice = selectedShelve.getProductPrice().toString();
         display.displayMessage(productName + " " + productPrice);
     }
 
-    private void displayInsertedCoinMessage() {
-        String productName = selectedShelve.get().getProductName();
-        BigDecimal productPrice = selectedShelve.get().getProductPrice();
-        BigDecimal moneyLeft = productPrice.subtract(insertedMoney.get());
+    private void displayInsertedCoinMessage(Shelve selectedShelve, BigDecimal insertedMoney) {
+        String productName = selectedShelve.getProductName();
+        BigDecimal productPrice = selectedShelve.getProductPrice();
+        BigDecimal moneyLeft = productPrice.subtract(insertedMoney);
         display.displayMessage(productName + " " + moneyLeft);
     }
 

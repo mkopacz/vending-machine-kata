@@ -222,4 +222,14 @@ public class BasicVendingMachineTest {
         vendingMachine.insertCoin(unacceptableCoin);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionWhenSelectedShelveManyTimesInRow()
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
+
+        vendingMachine.selectShelve(1);
+        vendingMachine.selectShelve(2);
+    }
+
 }
