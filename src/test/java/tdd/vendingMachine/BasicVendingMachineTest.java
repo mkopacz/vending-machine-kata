@@ -1,13 +1,17 @@
 package tdd.vendingMachine;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.assertj.core.data.MapEntry;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import tdd.vendingMachine.display.Display;
 import tdd.vendingMachine.domain.Coin;
 import tdd.vendingMachine.domain.CoinCassette;
 import tdd.vendingMachine.domain.Product;
 import tdd.vendingMachine.domain.Shelve;
+import tdd.vendingMachine.exception.CoinNotAcceptableException;
 import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
 
@@ -17,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
+@RunWith(JUnitParamsRunner.class)
 public class BasicVendingMachineTest {
 
     private Display displaySpy;
@@ -66,7 +71,7 @@ public class BasicVendingMachineTest {
 
     @Test
     public void shouldStoreCoinInsideMachineWhenSelectedShelveAndInsertedCoin()
-        throws InvalidShelveException, ProductNotAvailableException {
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
 
         Map<Coin, Integer> coins = new HashMap<>();
         CoinCassette cassette = new CoinCassette(coins);
@@ -79,7 +84,7 @@ public class BasicVendingMachineTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionWhenInsertedCoinWithoutSelectingShelve() {
+    public void shouldThrowExceptionWhenInsertedCoinWithoutSelectingShelve() throws CoinNotAcceptableException {
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.insertCoin(Coin.TEN_CENTS);
@@ -87,7 +92,7 @@ public class BasicVendingMachineTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionWhenSelectedShelveAfterInsertingCoins()
-        throws InvalidShelveException, ProductNotAvailableException {
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
 
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
@@ -98,7 +103,7 @@ public class BasicVendingMachineTest {
 
     @Test
     public void shouldDisplayAmountOfMoneyNeededToCoverProductPrice()
-        throws InvalidShelveException, ProductNotAvailableException {
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
 
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
@@ -111,7 +116,7 @@ public class BasicVendingMachineTest {
 
     @Test
     public void shouldShowThatInsertedNotEnoughMoney()
-        throws InvalidShelveException, ProductNotAvailableException {
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
 
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
@@ -124,7 +129,7 @@ public class BasicVendingMachineTest {
 
     @Test
     public void shouldShowThatInsertedEnoughMoney()
-        throws InvalidShelveException, ProductNotAvailableException {
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
 
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
@@ -157,7 +162,7 @@ public class BasicVendingMachineTest {
 
     @Test
     public void shouldReturnCoinsWhenCanceledAfterInsertingCoins()
-        throws InvalidShelveException, ProductNotAvailableException {
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
 
         CoinCassette cassette = new CoinCassette(new HashMap<>());
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
@@ -203,6 +208,18 @@ public class BasicVendingMachineTest {
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(1);
+    }
+
+    @Test(expected = CoinNotAcceptableException.class)
+    @Parameters({"ONE_CENT", "TWO_CENTS", "FIVE_CENTS"})
+    public void shouldThrowExceptionWhenInsertedCoinThatIsNotAcceptable(Coin unacceptableCoin)
+        throws CoinNotAcceptableException, InvalidShelveException, ProductNotAvailableException {
+
+        CoinCassette cassette = new CoinCassette(new HashMap<>());
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        vendingMachine.selectShelve(1);
+        vendingMachine.insertCoin(unacceptableCoin);
     }
 
 }

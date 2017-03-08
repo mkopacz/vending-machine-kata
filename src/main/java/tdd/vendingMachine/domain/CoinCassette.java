@@ -1,9 +1,15 @@
 package tdd.vendingMachine.domain;
 
+import tdd.vendingMachine.exception.CoinNotAcceptableException;
+
 import java.math.BigDecimal;
 import java.util.*;
 
 public class CoinCassette {
+
+    private static final List<Coin> acceptableCoins = Arrays.asList(
+        Coin.TEN_CENTS, Coin.TWENTY_CENTS, Coin.FIFTY_CENTS, Coin.ONE_DOLLAR, Coin.TWO_DOLLARS, Coin.FIVE_DOLLARS
+    );
 
     private final Map<Coin, Integer> coins;
 
@@ -11,7 +17,11 @@ public class CoinCassette {
         this.coins = coins;
     }
 
-    public void putCoin(Coin coin) {
+    public void putCoin(Coin coin) throws CoinNotAcceptableException {
+        if (!acceptableCoins.contains(coin)) {
+            throw new CoinNotAcceptableException(coin.getValue());
+        }
+
         coins.compute(coin, (k, v) -> v == null ? 1 : v + 1);
     }
 

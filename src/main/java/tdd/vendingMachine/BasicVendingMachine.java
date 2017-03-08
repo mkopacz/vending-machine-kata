@@ -4,6 +4,7 @@ import tdd.vendingMachine.display.Display;
 import tdd.vendingMachine.domain.Coin;
 import tdd.vendingMachine.domain.CoinCassette;
 import tdd.vendingMachine.domain.Shelve;
+import tdd.vendingMachine.exception.CoinNotAcceptableException;
 import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
 
@@ -56,7 +57,7 @@ public class BasicVendingMachine implements VendingMachine {
     }
 
     @Override
-    public void insertCoin(Coin coin) {
+    public void insertCoin(Coin coin) throws CoinNotAcceptableException {
         if (!selectedShelve.isPresent()) {
             throw new IllegalStateException("No shelve is selected!");
         }

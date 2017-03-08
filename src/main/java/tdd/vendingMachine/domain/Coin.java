@@ -4,12 +4,15 @@ import java.math.BigDecimal;
 
 public enum Coin {
 
-    TEN_CENTS("0.1"),
-    TWENTY_CENTS("0.2"),
-    FIFTY_CENTS("0.5"),
-    ONE_DOLLAR("1.0"),
-    TWO_DOLLARS("2.0"),
-    FIVE_DOLLARS("5.0");
+    ONE_CENT("0.01"),
+    TWO_CENTS("0.02"),
+    FIVE_CENTS("0.05"),
+    TEN_CENTS("0.10"),
+    TWENTY_CENTS("0.20"),
+    FIFTY_CENTS("0.50"),
+    ONE_DOLLAR("1.00"),
+    TWO_DOLLARS("2.00"),
+    FIVE_DOLLARS("5.00");
 
     private final BigDecimal value;
 
