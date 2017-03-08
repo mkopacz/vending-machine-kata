@@ -32,9 +32,9 @@ public class BasicVendingMachineTest {
         cassetteMock = mock(CoinCassette.class);
 
         shelves = new ArrayList<>();
-        shelves.add(new Shelve(1, new Product("cola drink", "2.44")));
-        shelves.add(new Shelve(2, new Product("chocolate bar", "9.99")));
-        shelves.add(new Shelve(3, new Product("mineral water", "109.90")));
+        shelves.add(new Shelve(1, new Product("cola drink", "2.44"), 1));
+        shelves.add(new Shelve(2, new Product("chocolate bar", "9.99"), 1));
+        shelves.add(new Shelve(3, new Product("mineral water", "109.90"), 1));
     }
 
     @Test

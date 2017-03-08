@@ -7,9 +7,16 @@ public class Shelve {
     private final int number;
     private final Product product;
 
-    public Shelve(int number, Product product) {
+    private int quantity;
+
+    public Shelve(int number, Product product, int quantity) {
         this.number = number;
         this.product = product;
+        this.quantity = quantity;
+    }
+
+    public boolean isProductAvailable() {
+        return quantity > 0;
     }
 
     public int getNumber() {
