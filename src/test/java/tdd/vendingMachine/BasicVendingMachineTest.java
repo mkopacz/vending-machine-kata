@@ -9,11 +9,9 @@ import tdd.vendingMachine.domain.CoinCassette;
 import tdd.vendingMachine.domain.Product;
 import tdd.vendingMachine.domain.Shelve;
 import tdd.vendingMachine.exception.InvalidShelveException;
+import tdd.vendingMachine.exception.ProductNotAvailableException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -47,7 +45,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test
-    public void shouldDisplayProductPriceWhenSelectedShelve() throws InvalidShelveException {
+    public void shouldDisplayProductPriceWhenSelectedShelve()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(2);
@@ -56,14 +56,18 @@ public class BasicVendingMachineTest {
     }
 
     @Test(expected = InvalidShelveException.class)
-    public void shouldThrowExceptionWhenSelectedInvalidShelve() throws InvalidShelveException {
+    public void shouldThrowExceptionWhenSelectedInvalidShelve()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(0);
     }
 
     @Test
-    public void shouldStoreCoinInsideMachineWhenSelectedShelveAndInsertedCoin() throws InvalidShelveException {
+    public void shouldStoreCoinInsideMachineWhenSelectedShelveAndInsertedCoin()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         Map<Coin, Integer> coins = new HashMap<>();
         CoinCassette cassette = new CoinCassette(coins);
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
@@ -82,7 +86,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionWhenSelectedShelveAfterInsertingCoins() throws InvalidShelveException {
+    public void shouldThrowExceptionWhenSelectedShelveAfterInsertingCoins()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(1);
@@ -91,7 +97,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test
-    public void shouldDisplayAmountOfMoneyNeededToCoverProductPrice() throws InvalidShelveException {
+    public void shouldDisplayAmountOfMoneyNeededToCoverProductPrice()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(3);
@@ -102,7 +110,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test
-    public void shouldShowThatInsertedNotEnoughMoney() throws InvalidShelveException {
+    public void shouldShowThatInsertedNotEnoughMoney()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(3);
@@ -113,7 +123,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test
-    public void shouldShowThatInsertedEnoughMoney() throws InvalidShelveException {
+    public void shouldShowThatInsertedEnoughMoney()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(1);
@@ -131,7 +143,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test
-    public void shouldReturnNoCoinsWhenCanceledWithoutInsertingCoins() throws InvalidShelveException {
+    public void shouldReturnNoCoinsWhenCanceledWithoutInsertingCoins()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         CoinCassette cassette = new CoinCassette(new HashMap<>());
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
 
@@ -142,7 +156,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test
-    public void shouldReturnCoinsWhenCanceledAfterInsertingCoins() throws InvalidShelveException {
+    public void shouldReturnCoinsWhenCanceledAfterInsertingCoins()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         CoinCassette cassette = new CoinCassette(new HashMap<>());
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
 
@@ -163,7 +179,9 @@ public class BasicVendingMachineTest {
     }
 
     @Test
-    public void shouldBeAbleToSelectShelveAgainWhenCanceled() throws InvalidShelveException {
+    public void shouldBeAbleToSelectShelveAgainWhenCanceled()
+        throws InvalidShelveException, ProductNotAvailableException {
+
         CoinCassette cassette = new CoinCassette(new HashMap<>());
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
 
@@ -174,6 +192,17 @@ public class BasicVendingMachineTest {
         } catch (IllegalStateException e) {
             fail("Should be able to select shelve!", e);
         }
+    }
+
+
+    @Test(expected = ProductNotAvailableException.class)
+    public void shouldThrowExceptionWhenSelectedShelveAndProductIsNotAvailable()
+        throws InvalidShelveException, ProductNotAvailableException {
+
+        List<Shelve> shelves = Arrays.asList(new Shelve(1, mock(Product.class), 0));
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
+
+        vendingMachine.selectShelve(1);
     }
 
 }

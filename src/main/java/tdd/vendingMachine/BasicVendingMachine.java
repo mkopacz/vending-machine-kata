@@ -5,6 +5,7 @@ import tdd.vendingMachine.domain.Coin;
 import tdd.vendingMachine.domain.CoinCassette;
 import tdd.vendingMachine.domain.Shelve;
 import tdd.vendingMachine.exception.InvalidShelveException;
+import tdd.vendingMachine.exception.ProductNotAvailableException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,20 +35,23 @@ public class BasicVendingMachine implements VendingMachine {
     }
 
     @Override
-    public void selectShelve(int shelveNumber) throws InvalidShelveException {
+    public void selectShelve(int shelveNumber) throws InvalidShelveException, ProductNotAvailableException {
         if (insertedMoney.isPresent()) {
             throw new IllegalStateException("Already inserted coins!");
         }
 
-        selectedShelve = shelves.stream()
+        Optional<Shelve> foundShelve = shelves.stream()
             .filter(shelve -> shelve.getNumber() == shelveNumber)
             .findFirst();
 
-        if (selectedShelve.isPresent()) {
-            insertedMoney = Optional.of(BigDecimal.ZERO);
-            displaySelectedShelveMessage();
-        } else {
+        if (!foundShelve.isPresent()) {
             throw new InvalidShelveException(shelveNumber);
+        } else if (!foundShelve.get().isProductAvailable()) {
+            String productName = foundShelve.get().getProductName();
+            throw new ProductNotAvailableException(productName);
+        } else {
+            initMachineState(foundShelve);
+            displaySelectedShelveMessage();
         }
     }
 
@@ -94,6 +98,11 @@ public class BasicVendingMachine implements VendingMachine {
         insertedMoney = insertedMoney.map(
             currentMoney -> currentMoney.add(coinValue)
         );
+    }
+
+    private void initMachineState(Optional<Shelve> selectedShelve) {
+        this.selectedShelve = selectedShelve;
+        insertedMoney = Optional.of(BigDecimal.ZERO);
     }
 
     private void resetMachineState() {
