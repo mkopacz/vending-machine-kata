@@ -15,4 +15,6 @@ public interface VendingMachine {
 
     boolean insertedEnoughMoney();
 
+    List<Coin> cancel();
+
 }

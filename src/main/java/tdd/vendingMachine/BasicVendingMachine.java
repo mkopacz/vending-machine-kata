@@ -72,11 +72,33 @@ public class BasicVendingMachine implements VendingMachine {
         return insertedMoney.get().compareTo(productPrice) >= 0;
     }
 
+    @Override
+    public List<Coin> cancel() {
+        if (!selectedShelve.isPresent()) {
+            throw new IllegalStateException("No shelve is selected!");
+        }
+
+        BigDecimal moneyToReturn = insertedMoney.get();
+        Optional<List<Coin>> coinsToReturn = cassette.getCoins(moneyToReturn);
+
+        if (!coinsToReturn.isPresent()) {
+            throw new IllegalStateException("There should be coins to cover " + moneyToReturn + "!");
+        } else {
+            resetMachineState();
+            return coinsToReturn.get();
+        }
+    }
+
     private void addCoinToInsertedMoney(Coin coin) {
         BigDecimal coinValue = coin.getValue();
         insertedMoney = insertedMoney.map(
             currentMoney -> currentMoney.add(coinValue)
         );
+    }
+
+    private void resetMachineState() {
+        selectedShelve = Optional.empty();
+        insertedMoney = Optional.empty();
     }
 
     private void displaySelectedShelveMessage() {

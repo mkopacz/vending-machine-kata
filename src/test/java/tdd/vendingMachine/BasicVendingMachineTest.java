@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 public class BasicVendingMachineTest {
@@ -74,7 +75,7 @@ public class BasicVendingMachineTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionWhenInsertedCoinWithoutSelectingShelve() throws InvalidShelveException {
+    public void shouldThrowExceptionWhenInsertedCoinWithoutSelectingShelve() {
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.insertCoin(Coin.TEN_CENTS);
@@ -123,10 +124,56 @@ public class BasicVendingMachineTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionWhenCheckedInsertedMoneyWithoutSelectingShelve() throws InvalidShelveException {
+    public void shouldThrowExceptionWhenCheckedInsertedMoneyWithoutSelectingShelve() {
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
+        vendingMachine.insertedEnoughMoney();
+    }
+
+    @Test
+    public void shouldReturnNoCoinsWhenCanceledWithoutInsertingCoins() throws InvalidShelveException {
+        CoinCassette cassette = new CoinCassette(new HashMap<>());
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        vendingMachine.selectShelve(2);
+        List<Coin> returnedCoins = vendingMachine.cancel();
+
+        assertThat(returnedCoins).isEmpty();
+    }
+
+    @Test
+    public void shouldReturnCoinsWhenCanceledAfterInsertingCoins() throws InvalidShelveException {
+        CoinCassette cassette = new CoinCassette(new HashMap<>());
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        vendingMachine.selectShelve(3);
+        vendingMachine.insertCoin(Coin.TWENTY_CENTS);
         vendingMachine.insertCoin(Coin.TEN_CENTS);
+        vendingMachine.insertCoin(Coin.FIFTY_CENTS);
+        List<Coin> returnedCoins = vendingMachine.cancel();
+
+        assertThat(returnedCoins).containsExactly(Coin.FIFTY_CENTS, Coin.TWENTY_CENTS, Coin.TEN_CENTS);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionWhenCanceledWithoutSelectingShelve() {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
+
+        vendingMachine.cancel();
+    }
+
+    @Test
+    public void shouldBeAbleToSelectShelveAgainWhenCanceled() throws InvalidShelveException {
+        CoinCassette cassette = new CoinCassette(new HashMap<>());
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        try {
+            vendingMachine.selectShelve(1);
+            vendingMachine.cancel();
+            vendingMachine.selectShelve(2);
+        } catch (IllegalStateException e) {
+            fail("Should be able to select shelve!", e);
+        }
     }
 
 }
