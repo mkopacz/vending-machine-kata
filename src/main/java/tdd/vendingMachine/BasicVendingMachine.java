@@ -2,9 +2,9 @@ package tdd.vendingMachine;
 
 import tdd.vendingMachine.display.Display;
 import tdd.vendingMachine.domain.*;
-import tdd.vendingMachine.exception.CoinNotAcceptableException;
 import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
+import tdd.vendingMachine.exception.UnacceptableCoinException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -55,7 +55,7 @@ public class BasicVendingMachine implements VendingMachine {
     }
 
     @Override
-    public void insertCoin(Coin coin) throws CoinNotAcceptableException {
+    public void insertCoin(Coin coin) throws UnacceptableCoinException {
         if (!selectedShelve.isPresent() || !insertedMoney.isPresent()) {
             throw new IllegalStateException("Either selected shelve or inserted money hasn't been yet initialized!");
         }

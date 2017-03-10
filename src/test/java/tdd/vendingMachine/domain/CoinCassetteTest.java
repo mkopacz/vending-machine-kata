@@ -5,7 +5,7 @@ import junitparams.Parameters;
 import org.assertj.core.data.MapEntry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import tdd.vendingMachine.exception.CoinNotAcceptableException;
+import tdd.vendingMachine.exception.UnacceptableCoinException;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CoinCassetteTest {
 
     @Test
-    public void shouldStoreCoinsInsideCassetteWhenPutCoins() throws CoinNotAcceptableException {
+    public void shouldStoreCoinsInsideCassetteWhenPutCoins() throws UnacceptableCoinException {
         Map<Coin, Integer> coins = new HashMap<>();
         CoinCassette cassette = new CoinCassette(coins);
 
@@ -26,10 +26,10 @@ public class CoinCassetteTest {
         assertThat(coins).containsExactly(MapEntry.entry(Coin.TEN_CENTS, 2));
     }
 
-    @Test(expected = CoinNotAcceptableException.class)
+    @Test(expected = UnacceptableCoinException.class)
     @Parameters({"ONE_CENT", "TWO_CENTS", "FIVE_CENTS"})
     public void shouldThrowExceptionWhenPutCoinThatIsNotAcceptable(Coin unacceptableCoin)
-        throws CoinNotAcceptableException {
+        throws UnacceptableCoinException {
 
         CoinCassette cassette = new CoinCassette(new HashMap<>());
 

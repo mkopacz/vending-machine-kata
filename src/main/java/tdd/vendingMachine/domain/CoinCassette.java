@@ -1,6 +1,6 @@
 package tdd.vendingMachine.domain;
 
-import tdd.vendingMachine.exception.CoinNotAcceptableException;
+import tdd.vendingMachine.exception.UnacceptableCoinException;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -17,9 +17,9 @@ public class CoinCassette {
         this.coins = coins;
     }
 
-    public void putCoin(Coin coin) throws CoinNotAcceptableException {
+    public void putCoin(Coin coin) throws UnacceptableCoinException {
         if (!acceptableCoins.contains(coin)) {
-            throw new CoinNotAcceptableException(coin.getValue());
+            throw new UnacceptableCoinException(coin.getValue());
         }
 
         coins.compute(coin, (k, v) -> v == null ? 1 : v + 1);
