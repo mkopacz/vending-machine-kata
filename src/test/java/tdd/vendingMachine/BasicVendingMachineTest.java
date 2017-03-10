@@ -7,10 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import tdd.vendingMachine.display.Display;
-import tdd.vendingMachine.domain.Coin;
-import tdd.vendingMachine.domain.CoinCassette;
-import tdd.vendingMachine.domain.Product;
-import tdd.vendingMachine.domain.Shelve;
+import tdd.vendingMachine.domain.*;
 import tdd.vendingMachine.exception.CoinNotAcceptableException;
 import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
@@ -36,8 +33,8 @@ public class BasicVendingMachineTest {
 
         shelves = new ArrayList<>();
         shelves.add(new Shelve(1, new Product("cola drink", "2.44"), 1));
-        shelves.add(new Shelve(2, new Product("chocolate bar", "9.99"), 1));
-        shelves.add(new Shelve(3, new Product("mineral water", "109.90"), 1));
+        shelves.add(new Shelve(2, new Product("chocolate bar", "5.99"), 1));
+        shelves.add(new Shelve(3, new Product("mineral water", "7.20"), 1));
     }
 
     @Test
@@ -57,7 +54,7 @@ public class BasicVendingMachineTest {
 
         vendingMachine.selectShelve(2);
 
-        verify(displaySpy).displayMessage("chocolate bar 9.99");
+        verify(displaySpy).displayMessage("chocolate bar 5.99");
     }
 
     @Test(expected = InvalidShelveException.class)
@@ -111,7 +108,7 @@ public class BasicVendingMachineTest {
         vendingMachine.insertCoin(Coin.FIVE_DOLLARS);
         vendingMachine.insertCoin(Coin.TWENTY_CENTS);
 
-        verify(displaySpy).displayMessage("mineral water 104.70");
+        verify(displaySpy).displayMessage("mineral water 2.00");
     }
 
     @Test
@@ -213,7 +210,7 @@ public class BasicVendingMachineTest {
     @Test(expected = CoinNotAcceptableException.class)
     @Parameters({"ONE_CENT", "TWO_CENTS", "FIVE_CENTS"})
     public void shouldThrowExceptionWhenInsertedCoinThatIsNotAcceptable(Coin unacceptableCoin)
-        throws CoinNotAcceptableException, InvalidShelveException, ProductNotAvailableException {
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
 
         CoinCassette cassette = new CoinCassette(new HashMap<>());
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
@@ -224,12 +221,108 @@ public class BasicVendingMachineTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionWhenSelectedShelveManyTimesInRow()
-        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+        throws InvalidShelveException, ProductNotAvailableException {
 
         VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
 
         vendingMachine.selectShelve(1);
         vendingMachine.selectShelve(2);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionWhenDispensedProductWithoutSelectingShelve() {
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
+
+        vendingMachine.dispenseProduct();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionWhenDispensedProductWithoutInsertingEnoughMoney()
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
+
+        vendingMachine.selectShelve(3);
+        vendingMachine.insertCoin(Coin.FIVE_DOLLARS);
+        vendingMachine.dispenseProduct();
+    }
+
+    @Test
+    public void shouldBeAbleToSelectShelveWhenDispensedWithoutProduct()
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+
+        CoinCassette cassette = new CoinCassette(new HashMap<>());
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        try {
+            vendingMachine.selectShelve(1);
+            vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+            vendingMachine.insertCoin(Coin.ONE_DOLLAR);
+            vendingMachine.dispenseProduct();
+            vendingMachine.selectShelve(1);
+        } catch (IllegalStateException e) {
+            fail("Should be able to select shelve!", e);
+        }
+    }
+
+    @Test
+    public void shouldBeAbleToSelectShelveWhenDispensedWithProduct()
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+
+        Map<Coin, Integer> coins = new HashMap<>();
+        coins.put(Coin.TWENTY_CENTS, 1);
+        coins.put(Coin.TEN_CENTS, 1);
+
+        CoinCassette cassette = new CoinCassette(coins);
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        try {
+            vendingMachine.selectShelve(3);
+            vendingMachine.insertCoin(Coin.FIVE_DOLLARS);
+            vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+            vendingMachine.insertCoin(Coin.FIFTY_CENTS);
+            vendingMachine.dispenseProduct();
+            vendingMachine.selectShelve(1);
+        } catch (IllegalStateException e) {
+            fail("Should be able to select shelve!", e);
+        }
+    }
+
+    @Test
+    public void shouldGetMoneyAndNoProductWhenChangeCantBeReturned()
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+
+        CoinCassette cassette = new CoinCassette(new HashMap<>());
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        vendingMachine.selectShelve(1);
+        vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+        vendingMachine.insertCoin(Coin.ONE_DOLLAR);
+        Purchase purchase = vendingMachine.dispenseProduct();
+
+        assertThat(purchase.getProduct()).isNull();
+        assertThat(purchase.getChange()).containsExactly(Coin.TWO_DOLLARS, Coin.ONE_DOLLAR);
+    }
+
+    @Test
+    public void shouldGetChangeAndProductWhenChangeCanBeReturned()
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+
+        Map<Coin, Integer> coins = new HashMap<>();
+        coins.put(Coin.TWENTY_CENTS, 1);
+        coins.put(Coin.TEN_CENTS, 1);
+
+        CoinCassette cassette = new CoinCassette(coins);
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        vendingMachine.selectShelve(3);
+        vendingMachine.insertCoin(Coin.FIVE_DOLLARS);
+        vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+        vendingMachine.insertCoin(Coin.FIFTY_CENTS);
+        Purchase purchase = vendingMachine.dispenseProduct();
+
+        assertThat(purchase.getProduct()).isNotNull();
+        assertThat(purchase.getChange()).containsExactly(Coin.TWENTY_CENTS, Coin.TEN_CENTS);
     }
 
 }

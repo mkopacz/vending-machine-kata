@@ -1,6 +1,7 @@
 package tdd.vendingMachine;
 
 import tdd.vendingMachine.domain.Coin;
+import tdd.vendingMachine.domain.Purchase;
 import tdd.vendingMachine.exception.CoinNotAcceptableException;
 import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
@@ -18,5 +19,7 @@ public interface VendingMachine {
     boolean insertedEnoughMoney();
 
     List<Coin> cancel();
+
+    Purchase dispenseProduct();
 
 }

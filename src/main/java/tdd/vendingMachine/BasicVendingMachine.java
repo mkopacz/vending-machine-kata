@@ -1,9 +1,7 @@
 package tdd.vendingMachine;
 
 import tdd.vendingMachine.display.Display;
-import tdd.vendingMachine.domain.Coin;
-import tdd.vendingMachine.domain.CoinCassette;
-import tdd.vendingMachine.domain.Shelve;
+import tdd.vendingMachine.domain.*;
 import tdd.vendingMachine.exception.CoinNotAcceptableException;
 import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
@@ -94,6 +92,31 @@ public class BasicVendingMachine implements VendingMachine {
         }
     }
 
+    @Override
+    public Purchase dispenseProduct() {
+        if (!selectedShelve.isPresent() || !insertedMoney.isPresent()) {
+            throw new IllegalStateException("Either selected shelve or inserted money hasn't been yet initialized!");
+        } else if (!insertedEnoughMoney()) {
+            throw new IllegalStateException("Not enough money has been inserted!");
+        }
+
+        BigDecimal changeAmount = calculateChange(selectedShelve.get(), insertedMoney.get());
+        Optional<List<Coin>> changeInCoins = cassette.getCoins(changeAmount);
+
+        if (!changeInCoins.isPresent()) {
+            List<Coin> insertedMoneyInCoins = cancel();
+            return new Purchase(null, insertedMoneyInCoins);
+        } else {
+            Optional<Product> product = selectedShelve.get().releaseProduct();
+            if (!product.isPresent()) {
+                throw new IllegalStateException("There should be product to release!");
+            } else {
+                resetMachineState();
+                return new Purchase(product.get(), changeInCoins.get());
+            }
+        }
+    }
+
     private void addCoinToInsertedMoney(Coin coin) {
         BigDecimal coinValue = coin.getValue();
         insertedMoney = insertedMoney.map(
@@ -122,6 +145,11 @@ public class BasicVendingMachine implements VendingMachine {
         BigDecimal productPrice = selectedShelve.getProductPrice();
         BigDecimal moneyLeft = productPrice.subtract(insertedMoney);
         display.displayMessage(productName + " " + moneyLeft);
+    }
+
+    private BigDecimal calculateChange(Shelve selectedShelve, BigDecimal insertedMoney) {
+        BigDecimal productPrice = selectedShelve.getProductPrice();
+        return insertedMoney.subtract(productPrice);
     }
 
 }
