@@ -104,6 +104,7 @@ public class BasicVendingMachine implements VendingMachine {
         Optional<List<Coin>> changeInCoins = cassette.getCoins(changeAmount);
 
         if (!changeInCoins.isPresent()) {
+            display.displayWarning("No change!");
             List<Coin> insertedMoneyInCoins = cancel();
             return new Purchase(null, insertedMoneyInCoins);
         } else {

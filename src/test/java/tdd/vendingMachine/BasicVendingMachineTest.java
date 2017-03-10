@@ -325,4 +325,19 @@ public class BasicVendingMachineTest {
         assertThat(purchase.getChange()).containsExactly(Coin.TWENTY_CENTS, Coin.TEN_CENTS);
     }
 
+    @Test
+    public void shouldDisplayWarningWhenChangeCantBeReturned()
+        throws InvalidShelveException, ProductNotAvailableException, CoinNotAcceptableException {
+
+        CoinCassette cassette = new CoinCassette(new HashMap<>());
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassette, displaySpy);
+
+        vendingMachine.selectShelve(1);
+        vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+        vendingMachine.insertCoin(Coin.ONE_DOLLAR);
+        vendingMachine.dispenseProduct();
+
+        verify(displaySpy).displayWarning("No change!");
+    }
+
 }
