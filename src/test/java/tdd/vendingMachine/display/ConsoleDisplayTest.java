@@ -28,4 +28,14 @@ public class ConsoleDisplayTest {
         assertThat(consoleOutput.toString()).isEqualTo(message + "\n");
     }
 
+    @Test
+    public void shouldDisplayWarning() {
+        Display display = new ConsoleDisplay();
+        String warning = "example warning";
+
+        display.displayWarning(warning);
+
+        assertThat(consoleOutput.toString()).isEqualTo("WARNING! " + warning + "\n");
+    }
+
 }
