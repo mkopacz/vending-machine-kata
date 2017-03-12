@@ -28,9 +28,7 @@ public class CoinCassetteTest {
 
     @Test(expected = UnacceptableCoinException.class)
     @Parameters({"ONE_CENT", "TWO_CENTS", "FIVE_CENTS"})
-    public void shouldThrowExceptionWhenPutCoinThatIsNotAcceptable(Coin unacceptableCoin)
-        throws UnacceptableCoinException {
-
+    public void shouldThrowExceptionWhenPutUnacceptableCoin(Coin unacceptableCoin) throws UnacceptableCoinException {
         CoinCassette cassette = new CoinCassette(new HashMap<>());
 
         cassette.putCoin(unacceptableCoin);
@@ -42,19 +40,15 @@ public class CoinCassetteTest {
                                                                List<Coin> expectedOutput) {
         CoinCassette cassette = new CoinCassette(coins);
 
-        List<Coin> actualOutput = cassette.getCoins(amount).get();
-
-        assertThat(actualOutput).isEqualTo(expectedOutput);
+        assertThat(cassette.getCoins(amount)).isEqualTo(Optional.of(expectedOutput));
     }
 
     @Test
-    @Parameters(method = "inputForUnSuccessfulCasesOfGettingCoins")
+    @Parameters(method = "inputForUnsuccessfulCasesOfGettingCoins")
     public void shouldReturnNoCoinsForGivenCoinsAndAmountOfMoney(Map<Coin, Integer> coins, BigDecimal amount) {
         CoinCassette cassette = new CoinCassette(coins);
 
-        Optional<List<Coin>> actualOutput = cassette.getCoins(amount);
-
-        assertThat(actualOutput).isEmpty();
+        assertThat(cassette.getCoins(amount)).isEmpty();
     }
 
     private Object[] inputForSuccessfulCasesOfGettingCoins() {
@@ -149,7 +143,7 @@ public class CoinCassetteTest {
         };
     }
 
-    private Object[] inputForUnSuccessfulCasesOfGettingCoins() {
+    private Object[] inputForUnsuccessfulCasesOfGettingCoins() {
         return new Object[][] {
             {
                 new HashMap<Coin, Integer>() {{

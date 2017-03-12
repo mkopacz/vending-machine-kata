@@ -3,8 +3,6 @@ package tdd.vendingMachine.domain;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -19,48 +17,43 @@ public class ShelveTest {
 
     @Test
     public void shouldShowThatProductIsAvailable() {
-        Shelve shelve = new Shelve(1, productMock, 1);
+        Shelve shelve = getShelveWithProductQuantity(1);
 
-        boolean isProductAvailable = shelve.isProductAvailable();
-
-        assertThat(isProductAvailable).isTrue();
+        assertThat(shelve.isProductAvailable()).isTrue();
     }
 
     @Test
     public void shouldShowThatProductIsNotAvailable() {
-        Shelve shelve = new Shelve(1, productMock, 0);
+        Shelve shelve = getShelveWithProductQuantity(0);
 
-        boolean isProductAvailable = shelve.isProductAvailable();
-
-        assertThat(isProductAvailable).isFalse();
+        assertThat(shelve.isProductAvailable()).isFalse();
     }
 
     @Test
     public void shouldReleaseProductWhenItIsAvailable() {
-        Shelve shelve = new Shelve(1, new Product("product", "1.99"), 1);
+        Shelve shelve = getShelveWithProductQuantity(1);
 
-        Optional<Product> product = shelve.releaseProduct();
-
-        assertThat(product).isPresent();
+        assertThat(shelve.releaseProduct()).isPresent();
     }
 
     @Test
     public void shouldNotReleaseProductWhenItIsNotAvailable() {
-        Shelve shelve = new Shelve(1, new Product("product", "1.99"), 0);
+        Shelve shelve = getShelveWithProductQuantity(0);
 
-        Optional<Product> product = shelve.releaseProduct();
-
-        assertThat(product).isEmpty();
+        assertThat(shelve.releaseProduct()).isEmpty();
     }
 
     @Test
     public void shouldNotReleaseProductWhenItIsNotAvailableAnymore() {
-        Shelve shelve = new Shelve(1, new Product("product", "1.99"), 1);
+        Shelve shelve = getShelveWithProductQuantity(1);
 
         shelve.releaseProduct();
-        Optional<Product> product = shelve.releaseProduct();
 
-        assertThat(product).isEmpty();
+        assertThat(shelve.releaseProduct()).isEmpty();
+    }
+
+    private Shelve getShelveWithProductQuantity(int quantity) {
+        return new Shelve(1, productMock, quantity);
     }
 
 }

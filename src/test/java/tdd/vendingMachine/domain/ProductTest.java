@@ -12,9 +12,7 @@ public class ProductTest {
     public void shouldRoundProductPrice() {
         Product product = new Product("product", "19.9876");
 
-        BigDecimal price = product.getPrice();
-
-        assertThat(price).isEqualTo(new BigDecimal("19.99"));
+        assertThat(product.getPrice()).isEqualTo(new BigDecimal("19.99"));
     }
 
 }
