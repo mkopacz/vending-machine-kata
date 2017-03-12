@@ -61,7 +61,7 @@ public class InsertingCoinsBasicVendingMachineState implements BasicVendingMachi
     private void displayInsertedCoinMessage() {
         String productName = selectedShelve.getProductName();
         BigDecimal productPrice = selectedShelve.getProductPrice();
-        BigDecimal moneyLeft = productPrice.subtract(insertedMoney);
+        BigDecimal moneyLeft = productPrice.subtract(insertedMoney).max(BigDecimal.ZERO.setScale(2));
         vendingMachine.getDisplay().displayMessage(productName + " " + moneyLeft);
     }
 

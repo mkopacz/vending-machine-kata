@@ -112,6 +112,20 @@ public class BasicVendingMachineTest {
     }
 
     @Test
+    public void shouldDisplayZeroWhenInsertedEnoughMoneyToCoverProductPrice()
+        throws InvalidShelveException, ProductNotAvailableException, UnacceptableCoinException {
+
+        VendingMachine vendingMachine = new BasicVendingMachine(shelves, cassetteMock, displaySpy);
+
+        vendingMachine.selectShelve(3);
+        vendingMachine.insertCoin(Coin.FIVE_DOLLARS);
+        vendingMachine.insertCoin(Coin.TWO_DOLLARS);
+        vendingMachine.insertCoin(Coin.ONE_DOLLAR);
+
+        verify(displaySpy).displayMessage("mineral water 0.00");
+    }
+
+    @Test
     public void shouldShowThatInsertedNotEnoughMoney()
         throws InvalidShelveException, ProductNotAvailableException, UnacceptableCoinException {
 
