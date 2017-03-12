@@ -9,7 +9,6 @@ import tdd.vendingMachine.exception.ProductNotAvailableException;
 import tdd.vendingMachine.exception.UnacceptableCoinException;
 
 import java.util.List;
-import java.util.Optional;
 
 public class SelectingProductBasicVendingMachineState implements BasicVendingMachineState {
 
@@ -21,19 +20,17 @@ public class SelectingProductBasicVendingMachineState implements BasicVendingMac
 
     @Override
     public void selectShelve(int shelveNumber) throws InvalidShelveException, ProductNotAvailableException {
-        Optional<Shelve> foundShelve = vendingMachine.getShelves().stream()
-            .filter(shelve -> shelve.getNumber() == shelveNumber)
-            .findFirst();
+        Shelve foundShelve = vendingMachine.getShelves().stream()
+            .filter(shelve -> shelve.getNumber() == shelveNumber).findFirst()
+            .orElseThrow(() -> new InvalidShelveException(shelveNumber));
 
-        if (!foundShelve.isPresent()) {
-            throw new InvalidShelveException(shelveNumber);
-        } else if (!foundShelve.get().isProductAvailable()) {
-            String productName = foundShelve.get().getProductName();
+        if (!foundShelve.isProductAvailable()) {
+            String productName = foundShelve.getProductName();
             throw new ProductNotAvailableException(productName);
-        } else {
-            displaySelectedShelveMessage(foundShelve.get());
-            goToInsertingCoinsState(foundShelve.get());
         }
+
+        displaySelectedShelveMessage(foundShelve);
+        goToInsertingCoinsState(foundShelve);
     }
 
     @Override

@@ -51,14 +51,11 @@ public class DispensingProductBasicVendingMachineState implements BasicVendingMa
     public Purchase dispenseProduct() {
         goToSelectingProductState();
 
-        Optional<List<Coin>> changeInCoins = tryToGetChange();
-        if (!changeInCoins.isPresent()) {
-            return returnInsertedMoney();
-        } else {
+        return tryToGetChange().map(changeInCoins -> {
             Product product = selectedShelve.releaseProduct()
                 .orElseThrow(() -> new IllegalStateException("There should be product to release!"));
-            return new Purchase(product, changeInCoins.get());
-        }
+            return new Purchase(product, changeInCoins);
+        }).orElseGet(this::returnInsertedMoney);
     }
 
     private Optional<List<Coin>> tryToGetChange() {
