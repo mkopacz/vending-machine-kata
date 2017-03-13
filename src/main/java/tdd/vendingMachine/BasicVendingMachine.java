@@ -27,7 +27,7 @@ public class BasicVendingMachine implements VendingMachine {
         this.cassette = cassette;
         this.display = display;
 
-        state = new SelectingProductBasicVendingMachineState(this);
+        this.state = new SelectingProductBasicVendingMachineState(this);
     }
 
     @Override
@@ -61,6 +61,8 @@ public class BasicVendingMachine implements VendingMachine {
     public Purchase dispenseProduct() {
         return state.dispenseProduct();
     }
+
+    // getters and setter required by state design pattern
 
     public List<Shelve> getShelves() {
         return shelves;

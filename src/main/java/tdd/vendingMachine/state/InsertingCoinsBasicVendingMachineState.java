@@ -1,7 +1,9 @@
 package tdd.vendingMachine.state;
 
 import tdd.vendingMachine.BasicVendingMachine;
+import tdd.vendingMachine.display.Display;
 import tdd.vendingMachine.domain.Coin;
+import tdd.vendingMachine.domain.CoinCassette;
 import tdd.vendingMachine.domain.Purchase;
 import tdd.vendingMachine.domain.Shelve;
 import tdd.vendingMachine.exception.InvalidShelveException;
@@ -16,11 +18,18 @@ public class InsertingCoinsBasicVendingMachineState implements BasicVendingMachi
     private final BasicVendingMachine vendingMachine;
     private final Shelve selectedShelve;
 
+    private final CoinCassette cassette;
+    private final Display display;
+
     private BigDecimal insertedMoney;
 
     public InsertingCoinsBasicVendingMachineState(BasicVendingMachine vendingMachine, Shelve selectedShelve) {
         this.vendingMachine = vendingMachine;
         this.selectedShelve = selectedShelve;
+
+        this.cassette = vendingMachine.getCassette();
+        this.display = vendingMachine.getDisplay();
+
         this.insertedMoney = BigDecimal.ZERO;
     }
 
@@ -31,8 +40,8 @@ public class InsertingCoinsBasicVendingMachineState implements BasicVendingMachi
 
     @Override
     public void insertCoin(Coin coin) throws UnacceptableCoinException {
-        vendingMachine.getCassette().putCoin(coin);
-        insertedMoney = insertedMoney.add(coin.getValue());
+        cassette.putCoin(coin);
+        addCoinToInsertedMoney(coin);
         displayInsertedCoinMessage();
 
         if (insertedEnoughMoney()) {
@@ -48,9 +57,11 @@ public class InsertingCoinsBasicVendingMachineState implements BasicVendingMachi
 
     @Override
     public List<Coin> cancel() {
-        goToSelectingProductState();
-        return vendingMachine.getCassette().getCoins(insertedMoney)
+        List<Coin> insertedMoneyInCoins = cassette.getCoins(insertedMoney)
             .orElseThrow(() -> new IllegalStateException("There should be coins to cover " + insertedMoney + "!"));
+
+        goToSelectingProductState();
+        return insertedMoneyInCoins;
     }
 
     @Override
@@ -58,23 +69,28 @@ public class InsertingCoinsBasicVendingMachineState implements BasicVendingMachi
         throw new IllegalStateException("Inserted not enough money!");
     }
 
+    private void addCoinToInsertedMoney(Coin coin) {
+        BigDecimal coinValue = coin.getValue();
+        insertedMoney = insertedMoney.add(coinValue);
+    }
+
     private void displayInsertedCoinMessage() {
         String productName = selectedShelve.getProductName();
         BigDecimal productPrice = selectedShelve.getProductPrice();
-        BigDecimal moneyLeft = productPrice.subtract(insertedMoney).max(BigDecimal.ZERO.setScale(2));
-        vendingMachine.getDisplay().displayMessage(productName + " " + moneyLeft);
+        BigDecimal moneyLeft = productPrice.subtract(insertedMoney).max(BigDecimal.ZERO);
+        display.displayMessage(productName + " " + moneyLeft.setScale(2));
     }
 
     private void goToSelectingProductState() {
-        BasicVendingMachineState insertingCoinsState =
+        BasicVendingMachineState selectingProductState =
             new SelectingProductBasicVendingMachineState(vendingMachine);
-        vendingMachine.setState(insertingCoinsState);
+        vendingMachine.setState(selectingProductState);
     }
 
     private void goToDispensingProductState() {
-        BasicVendingMachineState insertingCoinsState =
+        BasicVendingMachineState dispensingProductState =
             new DispensingProductBasicVendingMachineState(vendingMachine, selectedShelve, insertedMoney);
-        vendingMachine.setState(insertingCoinsState);
+        vendingMachine.setState(dispensingProductState);
     }
 
 }

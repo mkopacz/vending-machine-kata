@@ -1,6 +1,7 @@
 package tdd.vendingMachine.state;
 
 import tdd.vendingMachine.BasicVendingMachine;
+import tdd.vendingMachine.display.Display;
 import tdd.vendingMachine.domain.Coin;
 import tdd.vendingMachine.domain.Purchase;
 import tdd.vendingMachine.domain.Shelve;
@@ -8,20 +9,27 @@ import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
 import tdd.vendingMachine.exception.UnacceptableCoinException;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public class SelectingProductBasicVendingMachineState implements BasicVendingMachineState {
 
     private final BasicVendingMachine vendingMachine;
 
+    private final List<Shelve> shelves;
+    private final Display display;
+
     public SelectingProductBasicVendingMachineState(BasicVendingMachine vendingMachine) {
         this.vendingMachine = vendingMachine;
+
+        this.shelves = vendingMachine.getShelves();
+        this.display = vendingMachine.getDisplay();
     }
 
     @Override
     public void selectShelve(int shelveNumber) throws InvalidShelveException, ProductNotAvailableException {
-        Shelve foundShelve = vendingMachine.getShelves().stream()
-            .filter(shelve -> shelve.getNumber() == shelveNumber).findFirst()
+        Shelve foundShelve = findShelve(shelveNumber)
             .orElseThrow(() -> new InvalidShelveException(shelveNumber));
 
         if (!foundShelve.isProductAvailable()) {
@@ -53,10 +61,16 @@ public class SelectingProductBasicVendingMachineState implements BasicVendingMac
         throw new IllegalStateException("No shelve selected!");
     }
 
+    private Optional<Shelve> findShelve(int shelveNumber) {
+        return shelves.stream()
+            .filter(shelve -> shelve.getNumber() == shelveNumber)
+            .findFirst();
+    }
+
     private void displaySelectedShelveMessage(Shelve selectedShelve) {
         String productName = selectedShelve.getProductName();
-        String productPrice = selectedShelve.getProductPrice().toString();
-        vendingMachine.getDisplay().displayMessage(productName + " " + productPrice);
+        BigDecimal productPrice = selectedShelve.getProductPrice();
+        display.displayMessage(productName + " " + productPrice);
     }
 
     private void goToInsertingCoinsState(Shelve selectedShelve) {

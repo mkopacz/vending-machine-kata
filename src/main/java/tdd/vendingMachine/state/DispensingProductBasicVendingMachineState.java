@@ -1,10 +1,8 @@
 package tdd.vendingMachine.state;
 
 import tdd.vendingMachine.BasicVendingMachine;
-import tdd.vendingMachine.domain.Coin;
-import tdd.vendingMachine.domain.Product;
-import tdd.vendingMachine.domain.Purchase;
-import tdd.vendingMachine.domain.Shelve;
+import tdd.vendingMachine.display.Display;
+import tdd.vendingMachine.domain.*;
 import tdd.vendingMachine.exception.InvalidShelveException;
 import tdd.vendingMachine.exception.ProductNotAvailableException;
 import tdd.vendingMachine.exception.UnacceptableCoinException;
@@ -19,11 +17,17 @@ public class DispensingProductBasicVendingMachineState implements BasicVendingMa
     private final Shelve selectedShelve;
     private final BigDecimal insertedMoney;
 
+    private final CoinCassette cassette;
+    private final Display display;
+
     public DispensingProductBasicVendingMachineState(BasicVendingMachine vendingMachine, Shelve selectedShelve,
                                                      BigDecimal insertedMoney) {
         this.vendingMachine = vendingMachine;
         this.selectedShelve = selectedShelve;
         this.insertedMoney = insertedMoney;
+
+        this.cassette = vendingMachine.getCassette();
+        this.display = vendingMachine.getDisplay();
     }
 
 
@@ -49,32 +53,35 @@ public class DispensingProductBasicVendingMachineState implements BasicVendingMa
 
     @Override
     public Purchase dispenseProduct() {
-        goToSelectingProductState();
-
-        return tryToGetChange().map(changeInCoins -> {
+        Purchase purchase = tryToGetChange().map(changeInCoins -> {
             Product product = selectedShelve.releaseProduct()
                 .orElseThrow(() -> new IllegalStateException("There should be product to release!"));
             return new Purchase(product, changeInCoins);
-        }).orElseGet(this::returnInsertedMoney);
+        }).orElseGet(() -> {
+            display.displayWarning("No change!");
+            return returnInsertedMoney();
+        });
+
+        goToSelectingProductState();
+        return purchase;
     }
 
     private Optional<List<Coin>> tryToGetChange() {
         BigDecimal productPrice = selectedShelve.getProductPrice();
         BigDecimal changeAmount = insertedMoney.subtract(productPrice);
-        return vendingMachine.getCassette().getCoins(changeAmount);
+        return cassette.getCoins(changeAmount);
     }
 
     private Purchase returnInsertedMoney() {
-        vendingMachine.getDisplay().displayWarning("No change!");
-        List<Coin> insertedMoneyInCoins = vendingMachine.getCassette().getCoins(insertedMoney)
+        List<Coin> insertedMoneyInCoins = cassette.getCoins(insertedMoney)
             .orElseThrow(() -> new IllegalStateException("There should be coins to cover " + insertedMoney + "!"));
         return new Purchase(null, insertedMoneyInCoins);
     }
 
     private void goToSelectingProductState() {
-        BasicVendingMachineState insertingCoinsState =
+        BasicVendingMachineState selectingProductState =
             new SelectingProductBasicVendingMachineState(vendingMachine);
-        vendingMachine.setState(insertingCoinsState);
+        vendingMachine.setState(selectingProductState);
     }
 
 }

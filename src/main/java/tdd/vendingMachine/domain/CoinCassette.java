@@ -19,7 +19,8 @@ public class CoinCassette {
 
     public void putCoin(Coin coin) throws UnacceptableCoinException {
         if (!acceptableCoins.contains(coin)) {
-            throw new UnacceptableCoinException(coin.getValue());
+            BigDecimal coinValue = coin.getValue();
+            throw new UnacceptableCoinException(coinValue);
         }
 
         coins.compute(coin, (k, v) -> v == null ? 1 : v + 1);
@@ -31,7 +32,7 @@ public class CoinCassette {
             return Optional.of(result);
         }
 
-        SortedMap<Coin, Integer> coinsToUse = new TreeMap(coins);
+        SortedMap<Coin, Integer> coinsToUse = new TreeMap<>(coins);
         return collectMoneyUsingGivenCoins(amount, coinsToUse);
     }
 
@@ -41,7 +42,7 @@ public class CoinCassette {
         }
 
         List<Coin> result = new ArrayList<>();
-        SortedMap<Coin, Integer> coinsToUseCopy = new TreeMap(coinsToUse);
+        SortedMap<Coin, Integer> coinsToUseCopy = new TreeMap<>(coinsToUse);
         BigDecimal amountLeft = doCollectMoneyUsingGivenCoins(amount, coinsToUseCopy, result);
 
         if (BigDecimal.ZERO.compareTo(amountLeft) != 0) {
